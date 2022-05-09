@@ -1,9 +1,9 @@
+# Data
 data/bkk_radar_images
 data/bkk_radar_images_dBZ
 
-helpers
-models
-utils
-config.py
-train_and_test.py
-utils.py
+# Original Package
+HKO
+
+# Cache
+\__pycache__
