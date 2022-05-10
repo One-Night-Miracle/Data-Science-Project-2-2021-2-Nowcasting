@@ -7,3 +7,4 @@ HKO
 
 # Cache
 \__pycache__
+.DS_store
