@@ -55,21 +55,25 @@ __C.BENCHMARK.STRIDE = 5   # The stride
 
 
 # pandas data
-__C.PD_BASE_PATH = os.path.join(__C.DATA_BASE_PATH, 'data/pd')
-
-__C.IMG_DATETIME_PATH = os.path.join(__C.DATA_BASE_PATH, 'bkk_all.pkl')
-# __C.SORTED_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'sorted_day.pkl')
-# __C.RAINY_TRAIN_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'hko7_rainy_train_days.txt')
-# __C.RAINY_VALID_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'hko7_rainy_valid_days.txt')
-# __C.RAINY_TEST_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'hko7_rainy_test_days.txt')
+__C.ONM_PD_BASE_PATH = os.path.join(__C.DATA_BASE_PATH, 'pd')
+if not os.path.exists(__C.ONM_PD_BASE_PATH):
+    os.makedirs(__C.ONM_PD_BASE_PATH)
 
 __C.ONM_PD = edict()
-# __C.ONM_PD.ALL = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_all.pkl')
-# __C.ONM_PD.ALL_09_14 = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_all_09_14.pkl')
-# __C.ONM_PD.ALL_15 = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_all_15.pkl')
-# __C.ONM_PD.RAINY_TRAIN = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_rainy_train.pkl')
-# __C.ONM_PD.RAINY_VALID = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_rainy_valid.pkl')
-# __C.ONM_PD.RAINY_TEST = os.path.join(__C.ONM_PD_BASE_PATH, 'hko7_rainy_test.pkl')
+__C.ONM_PD.FOLDER_ALL = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_all.pkl')
+__C.ONM_PD.FOLDER_1 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_1.pkl')
+__C.ONM_PD.FOLDER_2 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_2.pkl')
+__C.ONM_PD.FOLDER_3 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_3.pkl')
+__C.ONM_PD.FOLDER_4 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_4.pkl')
+__C.ONM_PD.FOLDER_5 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_5.pkl')
+__C.ONM_PD.FOLDER_6 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_6.pkl')
+__C.ONM_PD.FOLDER_7 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_7.pkl')
+__C.ONM_PD.FOLDER_8 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_8.pkl')
+__C.ONM_PD.FOLDER_9 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_9.pkl')
+__C.ONM_PD.FOLDER_10 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_10.pkl')
+__C.ONM_PD.FOLDER_11 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_11.pkl')
+__C.ONM_PD.FOLDER_12 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_12.pkl')
+__C.ONM_PD.FOLDER_13 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_13.pkl')
 
 __C.ONM = edict()
 
