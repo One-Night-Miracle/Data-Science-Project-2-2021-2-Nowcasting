@@ -15,21 +15,23 @@ __C.GLOBAL.ZR.MAX_dBZ = 75.0
 __C.GLOBAL.ZR.A = 200.0
 __C.GLOBAL.ZR.B = 1.6
 
-# for dirs in ['/home/hzzone/save', '/Users/hzzone/Downloads']:
-#     if os.path.exists(dirs):
-#         __C.GLOBAL.MODEL_SAVE_DIR = dirs
-# assert __C.GLOBAL.MODEL_SAVE_DIR is not None
+for dirs in ['/models/save']:
+    if os.path.exists(dirs):
+        __C.GLOBAL.MODEL_SAVE_DIR = dirs
+assert __C.GLOBAL.MODEL_SAVE_DIR is not None
 
 __C.ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 __C.DATA_BASE_PATH = os.path.join(__C.ROOT_DIR, 'data')
 
-# for dirs in ['/Users/hzzone/Downloads/HKO-7_data/radarPNG', '/home/hzzone/HKO-7/radarPNG']:
-#     if os.path.exists(dirs):
-#         __C.HKO_PNG_PATH = dirs
-# for dirs in ['/Users/hzzone/Downloads/HKO-7_data/radarPNG_mask', '/home/hzzone/HKO-7/radarPNG_mask']:
-#     if os.path.exists(dirs):
-#         __C.HKO_MASK_PATH = dirs
-
+for dirs in ['/data/bkk_radar_images']:
+    if os.path.exists(dirs):
+        __C.RADAR_PNG_PATH = dirs
+for dirs in ['/data/bkk_radar_images']:
+    if os.path.exists(dirs):
+        __C.PNG_PATH = dirs
+for dirs in ['/data/bkk_radar_images_dBZ']:
+    if os.path.exists(dirs):
+        __C.MASK_PATH = dirs
 
 __C.EVALUATION = edict()
 # Image Cropping Region (TOP, LEFT, RIGHT, BOTTOM)
@@ -55,7 +57,7 @@ __C.BENCHMARK.STRIDE = 5   # The stride
 # pandas data
 __C.PD_BASE_PATH = os.path.join(__C.DATA_BASE_PATH, 'data/pd')
 
-# __C.VALID_DATETIME_PATH = os.path.join(__C.DATA_BASE_PATH, 'valid_datetime.pkl')
+__C.IMG_DATETIME_PATH = os.path.join(__C.DATA_BASE_PATH, 'bkk_all.pkl')
 # __C.SORTED_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'sorted_day.pkl')
 # __C.RAINY_TRAIN_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'hko7_rainy_train_days.txt')
 # __C.RAINY_VALID_DAYS_PATH = os.path.join(__C.DATA_BASE_PATH, 'hko7_rainy_valid_days.txt')
