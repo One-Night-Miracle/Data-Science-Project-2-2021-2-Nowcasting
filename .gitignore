@@ -1,1 +1,10 @@
-bkk_radar_images
+# Data
+data/bkk_radar_images
+data/bkk_radar_images_dBZ
+
+# Original Package
+HKO
+
+# Cache
+\__pycache__
+.DS_store
