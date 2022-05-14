@@ -65,7 +65,7 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
         if not os.path.exists(path_list[i]):
             raise IOError
     
-    if frame_size is not None:
+    if frame_size not None:
         frame_size = (img_height, img_width)
     im_h, im_w = frame_size
 
