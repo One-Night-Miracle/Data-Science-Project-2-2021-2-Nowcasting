@@ -6,5 +6,9 @@ data/bkk_radar_images_dBZ
 HKO
 
 # Cache
-\__pycache__
+__pycache__
 .DS_store
+.ipynb_checkpoints/
+
+# Logging
+logs/
