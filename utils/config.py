@@ -16,10 +16,9 @@ __C.GLOBAL.ZR.MAX_dBZ = 75.0
 __C.GLOBAL.ZR.A = 200.0
 __C.GLOBAL.ZR.B = 1.6
 
-for dirs in ['/models/save']:
-    if os.path.exists(dirs):
+for dirs in ['../models/save']:
         __C.GLOBAL.MODEL_SAVE_DIR = dirs
-# assert __C.GLOBAL.MODEL_SAVE_DIR is not None
+assert __C.GLOBAL.MODEL_SAVE_DIR is not None
 
 __C.ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 __C.DATA_BASE_PATH = os.path.join(__C.ROOT_DIR, 'data')
