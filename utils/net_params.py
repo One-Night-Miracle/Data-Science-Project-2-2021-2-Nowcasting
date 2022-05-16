@@ -1,8 +1,5 @@
-import sys
-sys.path.insert(0, '..')
 from utils.tools.dataloader import BKKIterator
 from utils.config import cfg
-import torch
 from utils.config import cfg
 from utils.blocks.forecaster import Forecaster
 from utils.blocks.encoder import Encoder
@@ -12,11 +9,12 @@ from torch.optim import lr_scheduler
 from utils.loss import Weighted_mse_mae
 from utils.blocks.trajGRU import TrajGRU
 from utils.train_and_test import train_and_test
-import numpy as np
 from utils.tools.evaluation import *
 from utils.blocks.convLSTM import ConvLSTM
+import torch
+import numpy as np
 
-batch_size = cfg.GLOBAL.BATCH_SZIE
+batch_size = cfg.GLOBAL.BATCH_SIZE
 
 IN_LEN = cfg.BENCHMARK.IN_LEN
 OUT_LEN = cfg.BENCHMARK.OUT_LEN
