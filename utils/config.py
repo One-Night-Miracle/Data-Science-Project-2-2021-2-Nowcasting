@@ -8,9 +8,8 @@ __C = edict()
 cfg = __C
 
 __C.GLOBAL = edict()
-__C.GLOBAL.DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else "cpu")
-__C.GLOBAL.MAX_WORKERS = 6
+__C.GLOBAL.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+__C.GLOBAL.MAX_WORKERS = 8
 __C.GLOBAL.BATCH_SIZE = 2
 __C.GLOBAL.ZR = edict()
 __C.GLOBAL.ZR.MAX_dBZ = 75.0
@@ -79,6 +78,11 @@ __C.ONM_PD.FOLDER_10 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_10.pkl')
 __C.ONM_PD.FOLDER_11 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_11.pkl')
 __C.ONM_PD.FOLDER_12 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_12.pkl')
 __C.ONM_PD.FOLDER_13 = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_13.pkl')
+
+__C.ONM_PD.RAINY_TRAIN = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_train.pkl')
+__C.ONM_PD.RAINY_VALID = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_valid.pkl')
+__C.ONM_PD.RAINY_TEST =os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_test.pkl')
+
 
 __C.ONM = edict()
 
