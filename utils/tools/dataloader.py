@@ -8,7 +8,8 @@ from utils.utils import *
 import os
 import pickle
 
-## Month Encoder-Decoder
+# Month Encoder-Decoder
+
 
 def encode_month(month):
     """
@@ -28,6 +29,7 @@ def encode_month(month):
     ret[..., 0] = np.cos(angle)
     ret[..., 1] = np.sin(angle)
     return ret
+
 
 def decode_month(code):
     """
@@ -51,7 +53,7 @@ def decode_month(code):
     return month
 
 
-## Get mask
+# Get mask
 
 def get_exclude_mask():
     with np.load(os.path.join(cfg.DATA_BASE_PATH, 'mask_dat.npz')) as dat:
@@ -59,7 +61,7 @@ def get_exclude_mask():
         return exclude_mask
 
 
-## Get Date Info
+# Get Date Info
 
 def get_valid_datetime_set():
     valid_datetime_set = pickle.load(open(cfg.CSV_DATETIME_PATH, 'rb'))
@@ -70,7 +72,7 @@ def get_valid_datetime_set():
 
 # -Delete- convert_datetime_to_maskpath
 
-# -Delete- HKOSimpleBuffer(object)
+# -Delete- SimpleBuffer(object)
 
 # -Delete- pad_hko_dat
 
@@ -108,13 +110,14 @@ class BKKIterator(object):
         base_freq : str, optional
         """
         if width is None:
-            width = cfg.HKO.ITERATOR.WIDTH
+            width = cfg.ONM.ITERATOR.WIDTH
         if height is None:
-            height = cfg.HKO.ITERATOR.HEIGHT
+            height = cfg.ONM.ITERATOR.HEIGHT
 
         self._df = pd.read_pickle(path=pd_path)
         self.set_begin_end(begin_ind=begin_ind, end_ind=end_ind)
-        self._df_index_set = frozenset([self._df.index[i] for i in range(self._df.size)])
+        self._df_index_set = frozenset(
+            [self._df.index[i] for i in range(self._df.size)])
         self._exclude_mask = get_exclude_mask()
         self._seq_len = seq_len
         self._width = width
@@ -124,7 +127,8 @@ class BKKIterator(object):
         self._base_freq = base_freq
         self._base_time_delta = pd.Timedelta(base_freq)
 
-        assert sample_mode in ["random", "sequent"], "Sample mode=%s is not supported" %sample_mode
+        assert sample_mode in [
+            "random", "sequent"], "Sample mode=%s is not supported" % sample_mode
         self.sample_mode = sample_mode
 
         if sample_mode == "sequent":
@@ -195,10 +199,10 @@ class BKKIterator(object):
             assert len(clip) == self._seq_len
         batch_size = len(datetime_clips)
         frame_dat = np.zeros((self._seq_len, batch_size, 1, self._height, self._width),
-                                  dtype=np.uint8)
+                             dtype=np.uint8)
         mask_dat = np.zeros((self._seq_len, batch_size, 1, self._height, self._width),
-                                 dtype=np.bool)
-        if batch_size==0:
+                            dtype=np.bool)
+        if batch_size == 0:
             return frame_dat, mask_dat
         if self.sample_mode == "random":
             paths = []
@@ -209,8 +213,10 @@ class BKKIterator(object):
                 for j in range(batch_size):
                     timestamp = datetime_clips[j][i]
                     if timestamp in self._df_index_set:
-                        paths.append(convert_datetime_to_filepath(datetime_clips[j][i]))
-                        mask_paths.append(convert_datetime_to_maskpath(datetime_clips[j][i]))
+                        paths.append(
+                            self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
+                        # paths.append(convert_datetime_to_filepath(datetime_clips[j][i]))
+                        # mask_paths.append(convert_datetime_to_maskpath(datetime_clips[j][i]))
                         hit_inds.append([i, j])
                     else:
                         miss_inds.append([i, j])
@@ -235,19 +241,23 @@ class BKKIterator(object):
                         last_timestamp = max(last_timestamp, timestamp)
             if self._buffer_datetime_keys is None or\
                 not (first_timestamp in self._buffer_datetime_keys
-                    and last_timestamp in self._buffer_datetime_keys):
+                     and last_timestamp in self._buffer_datetime_keys):
                 read_begin_ind = self._df.index.get_loc(first_timestamp)
                 read_end_ind = self._df.index.get_loc(last_timestamp) + 1
                 read_end_ind = min(read_begin_ind +
-                                   self._buffer_mult * (read_end_ind - read_begin_ind),
+                                   self._buffer_mult *
+                                   (read_end_ind - read_begin_ind),
                                    self._df.size)
                 self._buffer_datetime_keys = self._df.index[read_begin_ind:read_end_ind]
                 # Fill in the buffer
                 paths = []
                 mask_paths = []
                 for i in range(self._buffer_datetime_keys.size):
-                    paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
-                    mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
+                    timestamp = self._buffer_datetime_keys[i]
+                    paths.append(
+                        self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
+                    # paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
+                    # mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
                 self._buffer_frame_dat = image.quick_read_frames(path_list=paths,
                                                                  im_h=self._height,
                                                                  im_w=self._width,
@@ -259,8 +269,10 @@ class BKKIterator(object):
                     if timestamp in self._df_index_set:
                         assert timestamp in self._buffer_datetime_keys
                         ind = self._buffer_datetime_keys.get_loc(timestamp)
-                        frame_dat[i, j, :, :, :] = self._buffer_frame_dat[ind, :, :, :]
-                        mask_dat[i, j, :, :, :] = self._buffer_mask_dat[ind, :, :, :]
+                        frame_dat[i, j, :, :,
+                                  :] = self._buffer_frame_dat[ind, :, :, :]
+                        mask_dat[i, j, :, :,
+                                 :] = self._buffer_mask_dat[ind, :, :, :]
         return frame_dat, mask_dat
 
     def reset(self, begin_ind=None, end_ind=None):
@@ -281,6 +293,7 @@ class BKKIterator(object):
         datetime_clip = pd.date_range(start=self._current_datetime,
                                       periods=self._seq_len,
                                       freq=self._base_freq)
+        datetime_clip.freq = None
         if self._is_valid_clip(datetime_clip):
             return self._current_datetime == self.begin_time
         else:
@@ -288,7 +301,7 @@ class BKKIterator(object):
 
     def sample(self, batch_size, only_return_datetime=False):
         """Sample a minibatch from the hko7 dataset based on the given type and pd_file
-        
+
         Parameters
         ----------
         batch_size : int
@@ -307,7 +320,7 @@ class BKKIterator(object):
         """
         if self.sample_mode == 'sequent':
             if self.use_up:
-                raise ValueError("The HKOIterator has been used up!")
+                raise ValueError("The BKKIterator has been used up!")
             datetime_clips = []
             new_start = False
             for i in range(batch_size):
@@ -316,14 +329,16 @@ class BKKIterator(object):
                                                   periods=self._seq_len,
                                                   freq=self._base_freq)
                     if self._is_valid_clip(datetime_clip):
-                        new_start = new_start or (self._current_datetime == self.begin_time)
+                        new_start = new_start or (
+                            self._current_datetime == self.begin_time)
                         datetime_clips.append(datetime_clip)
                         self._current_datetime += self._stride * self._base_time_delta
                         break
                     else:
                         new_start = True
                         self._current_datetime =\
-                            self._next_exist_timestamp(timestamp=self._current_datetime)
+                            self._next_exist_timestamp(
+                                timestamp=self._current_datetime)
                         if self._current_datetime is None:
                             # This indicates that there is no timestamp left,
                             # We point the current_datetime to be the next timestamp of self.end_time
@@ -349,4 +364,3 @@ class BKKIterator(object):
                         break
         frame_dat, mask_dat = self._load_frames(datetime_clips=datetime_clips)
         return frame_dat, mask_dat, datetime_clips, new_start
-
