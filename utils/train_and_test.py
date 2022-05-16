@@ -45,11 +45,10 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
     writer = SummaryWriter(log_dir)
 
     for itera in tqdm(range(1, max_iterations+1)):
-        lr_scheduler.step()
-        train_batch, train_mask, sample_datetimes, _ = \
-            train_iter.sample(batch_size=batch_size)
-        train_batch = torch.from_numpy(train_batch.astype(
-            np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
+        if itera!=1:
+            lr_scheduler.step()
+        train_batch, train_mask, sample_datetimes, _ = train_iter.sample(batch_size=batch_size)
+        train_batch = torch.from_numpy(train_batch.astype(np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
         train_data = train_batch[:IN_LEN, ...]
         train_label = train_batch[IN_LEN:IN_LEN + OUT_LEN, ...]
         mask = torch.from_numpy(
@@ -95,7 +94,7 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
                         valid_iter.sample(batch_size=batch_size)
                     if valid_batch.shape[1] == 0:
                         break
-                    if not cfg.HKO.EVALUATION.VALID_DATA_USE_UP and valid_time > cfg.HKO.EVALUATION.VALID_TIME:
+                    if not cfg.EVALUATION.VALID_DATA_USE_UP and valid_time > cfg.EVALUATION.VALID_TIME:
                         break
                     valid_time += 1
                     valid_batch = torch.from_numpy(valid_batch.astype(
@@ -164,7 +163,7 @@ def plot_result(writer, itera, train_result, valid_result):
         np.nan_to_num(valid_balanced_mse), \
         np.nan_to_num(valid_balanced_mae)
 
-    for i, thresh in enumerate(cfg.HKO.EVALUATION.THRESHOLDS):
+    for i, thresh in enumerate(cfg.EVALUATION.THRESHOLDS):
 
         writer.add_scalars("csi/{}".format(thresh), {
             "train": train_csi[:, i].mean(),
@@ -173,7 +172,7 @@ def plot_result(writer, itera, train_result, valid_result):
             "valid_last_frame": valid_csi[-1, i]
         }, itera)
 
-    for i, thresh in enumerate(cfg.HKO.EVALUATION.THRESHOLDS):
+    for i, thresh in enumerate(cfg.EVALUATION.THRESHOLDS):
 
         writer.add_scalars("hss/{}".format(thresh), {
             "train": train_hss[:, i].mean(),
