@@ -8,12 +8,10 @@ from utils.config import cfg
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, wait
 
-_imread_executor_pool = ThreadPoolExecutor(max_workers=16)
+_imread_executor_pool = ThreadPoolExecutor(max_workers=cfg.GLOBAL.MAX_WORKERS)
 
-_executor_pool = ThreadPoolExecutor(max_workers=cfg.GLOBAL.MAX_WORKERS)
 img_width = cfg.ONM.ITERATOR.WIDTH
 img_height = cfg.ONM.ITERATOR.HEIGHT
-
 
 def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_size=None):
     """
@@ -110,7 +108,7 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
         else:
             future_objs = []
             for i in range(img_num):
-                obj = _imread_executor_pool.submit(cv2_read_img, path_list[i], read_storage[0], grayscale)
+                obj = _imread_executor_pool.submit(cv2_read_img, path_list[i], read_storage[i], grayscale)
                 future_objs.append(obj)
             wait(future_objs)
         
