@@ -117,7 +117,7 @@ class BKKIterator(object):
         self._df = pd.read_pickle(pd_path)
         self.set_begin_end(begin_ind=begin_ind, end_ind=end_ind)
         self._df_index_set = frozenset(
-            [self._df.index[i] for i in range(self._df.size)])
+            [self._df.index[i] for i in range(self._df.shape[0])])
         self._exclude_mask = get_exclude_mask()
         self._seq_len = seq_len
         self._width = width
@@ -147,7 +147,7 @@ class BKKIterator(object):
 
     @property
     def total_frame_num(self):
-        return self._df.size
+        return self._df.shape[0]
 
     @property
     def begin_time(self):
@@ -166,7 +166,7 @@ class BKKIterator(object):
 
     def _next_exist_timestamp(self, timestamp):
         next_ind = bisect.bisect_right(self._df.index, timestamp)
-        if next_ind >= self._df.size:
+        if next_ind >= self._df.shape[0]:
             return None
         else:
             return self._df.index[bisect.bisect_right(self._df.index, timestamp)]
@@ -198,9 +198,9 @@ class BKKIterator(object):
         for clip in datetime_clips:
             assert len(clip) == self._seq_len
         batch_size = len(datetime_clips)
-        frame_dat = np.zeros((self._seq_len, batch_size, 1, self._height, self._width),
+        frame_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),
                              dtype=np.uint8)
-        mask_dat = np.zeros((self._seq_len, batch_size, 1, self._height, self._width),
+        mask_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),
                             dtype=np.bool)
         if batch_size == 0:
             return frame_dat, mask_dat
@@ -213,18 +213,14 @@ class BKKIterator(object):
                 for j in range(batch_size):
                     timestamp = datetime_clips[j][i]
                     if timestamp in self._df_index_set:
-                        paths.append(
-                            self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
+                        paths.append("../.." + self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
                         # paths.append(convert_datetime_to_filepath(datetime_clips[j][i]))
                         # mask_paths.append(convert_datetime_to_maskpath(datetime_clips[j][i]))
                         hit_inds.append([i, j])
                     else:
                         miss_inds.append([i, j])
             hit_inds = np.array(hit_inds, dtype=np.int)
-            all_frame_dat = image.quick_read_frames(path_list=paths,
-                                                    im_h=self._height,
-                                                    im_w=self._width,
-                                                    grayscale=True)
+            all_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
             all_mask_dat = quick_read_masks(mask_paths)
             frame_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_frame_dat
             mask_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_mask_dat
@@ -252,16 +248,13 @@ class BKKIterator(object):
                 # Fill in the buffer
                 paths = []
                 mask_paths = []
-                for i in range(self._buffer_datetime_keys.size):
+                for i in range(self._buffer_datetime_keys.shape[0]):
                     timestamp = self._buffer_datetime_keys[i]
                     paths.append(
                         self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
                     # paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
                     # mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
-                self._buffer_frame_dat = image.quick_read_frames(path_list=paths,
-                                                                 im_h=self._height,
-                                                                 im_w=self._width,
-                                                                 grayscale=True)
+                self._buffer_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
                 self._buffer_mask_dat = quick_read_masks(mask_paths)
             for i in range(self._seq_len):
                 for j in range(batch_size):
@@ -354,7 +347,7 @@ class BKKIterator(object):
             new_start = None
             for i in range(batch_size):
                 while True:
-                    rand_ind = np.random.randint(0, self._df.size, 1)[0]
+                    rand_ind = np.random.randint(0, self._df.shape[0], 1)[0]
                     random_datetime = self._df.index[rand_ind]
                     datetime_clip = pd.date_range(start=random_datetime,
                                                   periods=self._seq_len,
