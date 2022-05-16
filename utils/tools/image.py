@@ -5,12 +5,10 @@ import numpy as np
 from utils.config import cfg
 from concurrent.futures import ThreadPoolExecutor, wait
 
-_imread_executor_pool = ThreadPoolExecutor(max_workers=8)
+_imread_executor_pool = ThreadPoolExecutor(max_workers=16)
 
-_executor_pool = ThreadPoolExecutor(max_workers=cfg.GLOBAL.MAX_WORKERS)
 img_width = cfg.ONM.ITERATOR.WIDTH
 img_height = cfg.ONM.ITERATOR.HEIGHT
-
 
 def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_size=None):
     """
