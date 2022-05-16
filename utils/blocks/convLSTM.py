@@ -1,6 +1,6 @@
 from torch import nn
 import torch
-from nowcasting.config import cfg
+from utils.config import cfg
 
 class ConvLSTM(nn.Module):
     def __init__(self, input_channel, num_filter, b_h_w, kernel_size, stride=1, padding=1):
@@ -22,7 +22,7 @@ class ConvLSTM(nn.Module):
 
     # inputs and states should not be all none
     # inputs: S*B*C*H*W
-    def forward(self, inputs=None, states=None, seq_len=cfg.HKO.BENCHMARK.IN_LEN):
+    def forward(self, inputs=None, states=None, seq_len=cfg.BENCHMARK.IN_LEN):
 
         if states is None:
             c = torch.zeros((inputs.size(1), self._num_filter, self._state_height,
