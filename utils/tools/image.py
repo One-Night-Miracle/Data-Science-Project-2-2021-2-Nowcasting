@@ -27,7 +27,7 @@ def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_
     -------
     """
     if frame_size is None:
-        frame_size = (img_height, img_width)
+        frame_size = (img_width, img_height)
     
     if grayscale:
         read_storage[:] = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -56,13 +56,14 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
     """
     img_num = len(path_list)
 
-    for i in range(img_num):
-        if not os.path.exists(path_list[i]):
-            raise IOError
+    # for i in range(img_num):
+    #     if not os.path.exists(path_list[i]):
+    #         # print(path_list[i])
+    #         raise IOError
     
     if frame_size is None:
-        frame_size = (img_height, img_width)
-    im_h, im_w = frame_size
+        frame_size = (img_width, img_height)
+    im_w, im_h = frame_size
 
     if grayscale:
         read_storage = np.empty((img_num, im_w, im_h), dtype=np.uint8)
