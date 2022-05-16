@@ -114,7 +114,7 @@ class BKKIterator(object):
         if height is None:
             height = cfg.ONM.ITERATOR.HEIGHT
 
-        self._df = pd.read_pickle(path=pd_path)
+        self._df = pd.read_pickle(pd_path)
         self.set_begin_end(begin_ind=begin_ind, end_ind=end_ind)
         self._df_index_set = frozenset(
             [self._df.index[i] for i in range(self._df.size)])
