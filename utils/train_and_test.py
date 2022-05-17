@@ -1,12 +1,11 @@
-import os
-import torch
 from utils.tools.dataloader import BKKIterator
 from utils.config import cfg
-import numpy as np
 from utils.tools.evaluation import Evaluation
+import sys, os
+import torch
+import numpy as np
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
-import os
 import shutil
 import copy
 
@@ -45,14 +44,13 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
     writer = SummaryWriter(log_dir)
 
     for itera in tqdm(range(1, max_iterations+1)):
-        if itera!=1:
-            lr_scheduler.step()
+        # if itera!=1:
+        lr_scheduler.step()
         train_batch, train_mask, sample_datetimes, _ = train_iter.sample(batch_size=batch_size)
         train_batch = torch.from_numpy(train_batch.astype(np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
         train_data = train_batch[:IN_LEN, ...]
         train_label = train_batch[IN_LEN:IN_LEN + OUT_LEN, ...]
-        mask = torch.from_numpy(
-            train_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
+        mask = torch.from_numpy(train_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
 
         encoder_forecaster.train()
         optimizer.zero_grad()
@@ -90,8 +88,7 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
                 valid_loss = 0.0
                 valid_time = 0
                 while not valid_iter.use_up:
-                    valid_batch, valid_mask, sample_datetimes, _ = \
-                        valid_iter.sample(batch_size=batch_size)
+                    valid_batch, valid_mask, sample_datetimes, _ = valid_iter.sample(batch_size=batch_size)
                     if valid_batch.shape[1] == 0:
                         break
                     if not cfg.EVALUATION.VALID_DATA_USE_UP and valid_time > cfg.EVALUATION.VALID_TIME:
@@ -113,11 +110,9 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
                         output_numpy = np.clip(
                             output.detach().cpu().numpy(), 0.0, 1.0)
                     else:
-                        output_numpy = probToPixel(output.detach().cpu(
-                        ).numpy(), valid_label, mask, lr_scheduler.get_lr()[0])
+                        output_numpy = probToPixel(output.detach().cpu().numpy(), valid_label, mask, lr_scheduler.get_lr()[0])
 
-                    evaluator.update(valid_label_numpy,
-                                     output_numpy, mask.cpu().numpy())
+                    evaluator.update(valid_label_numpy,output_numpy, mask.cpu().numpy())
                 _, _, valid_csi, valid_hss, _, valid_mse, valid_mae, valid_balanced_mse, valid_balanced_mae, _ = evaluator.calculate_stat()
 
                 evaluator.clear_all()
