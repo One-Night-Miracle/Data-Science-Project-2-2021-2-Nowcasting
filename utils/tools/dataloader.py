@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import bisect
-from utils.tools import image
-from utils.tools.mask import *
+from utils.tools import image, mask
 from utils.config import cfg
 from utils.utils import *
 import os
@@ -221,7 +220,7 @@ class BKKIterator(object):
                         miss_inds.append([i, j])
             hit_inds = np.array(hit_inds, dtype=np.int)
             all_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
-            all_mask_dat = quick_read_masks(mask_paths)
+            all_mask_dat = mask.quick_read_masks(mask_paths)
             frame_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_frame_dat
             mask_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_mask_dat
         else:
@@ -255,17 +254,15 @@ class BKKIterator(object):
                     # paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
                     # mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
                 self._buffer_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
-                self._buffer_mask_dat = quick_read_masks(mask_paths)
+                self._buffer_mask_dat = mask.quick_read_masks(mask_paths)
             for i in range(self._seq_len):
                 for j in range(batch_size):
                     timestamp = datetime_clips[j][i]
                     if timestamp in self._df_index_set:
                         assert timestamp in self._buffer_datetime_keys
                         ind = self._buffer_datetime_keys.get_loc(timestamp)
-                        frame_dat[i, j, :, :,
-                                  :] = self._buffer_frame_dat[ind, :, :, :]
-                        mask_dat[i, j, :, :,
-                                 :] = self._buffer_mask_dat[ind, :, :, :]
+                        frame_dat[i, j, :, :, :] = self._buffer_frame_dat[ind, :, :, :]
+                        mask_dat[i, j, :, :, :] = self._buffer_mask_dat[ind, :, :, :]
         return frame_dat, mask_dat
 
     def reset(self, begin_ind=None, end_ind=None):
