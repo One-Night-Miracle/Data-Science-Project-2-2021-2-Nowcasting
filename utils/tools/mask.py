@@ -4,7 +4,8 @@ import numpy as np
 from utils.config import cfg
 from concurrent.futures import ThreadPoolExecutor, wait
 
-_executor_pool = ThreadPoolExecutor(max_workers=cfg.GLOBAL.MAX_WORKERS)
+_imread_executor_pool = ThreadPoolExecutor(max_workers=16)
+
 img_width = cfg.ONM.ITERATOR.WIDTH
 img_height = cfg.ONM.ITERATOR.HEIGHT
 
@@ -72,7 +73,7 @@ def quick_read_masks(path_list):
 
     future_objs = []
     for i in range(num):
-        obj = _executor_pool.submit(read_mask_file, path_list[i], read_storage[i])
+        obj = _imread_executor_pool.submit(read_mask_file, path_list[i], read_storage[i])
         future_objs.append(obj)
     wait(future_objs)
 
