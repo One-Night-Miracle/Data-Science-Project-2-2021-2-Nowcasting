@@ -1,8 +1,6 @@
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), '')))
+import torch
 from torch import nn
 import torch.nn.functional as F
-import torch
 from utils.utils import make_layers
 
 class EF(nn.Module):

@@ -1,19 +1,14 @@
 # Python plugin that supports loading batch of images in parallel
+import os
 import cv2
 import numpy as np
-import threading
-import os
-import struct
 from utils.config import cfg
-import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, wait
 
 _imread_executor_pool = ThreadPoolExecutor(max_workers=16)
 
-_executor_pool = ThreadPoolExecutor(max_workers=cfg.GLOBAL.MAX_WORKERS)
 img_width = cfg.ONM.ITERATOR.WIDTH
 img_height = cfg.ONM.ITERATOR.HEIGHT
-
 
 def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_size=None):
     """
@@ -32,10 +27,10 @@ def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_
     -------
     """
     if frame_size is None:
-        frame_size = (img_height, img_width)
+        frame_size = (img_width, img_height)
     
     if grayscale:
-        read_storage[:] = cv2.imread(path, 0)
+        read_storage[:] = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     else:
         read_storage[:] = cv2.imread(path)
     
@@ -61,25 +56,26 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
     """
     img_num = len(path_list)
 
-    for i in range(img_num):
-        if not os.path.exists(path_list[i]):
-            raise IOError
+    # for i in range(img_num):
+    #     if not os.path.exists(path_list[i]):
+    #         # print(path_list[i])
+    #         raise IOError
     
-    if frame_size is not None:
-        frame_size = (img_height, img_width)
-    im_h, im_w = frame_size
+    if frame_size is None:
+        frame_size = (img_width, img_height)
+    im_w, im_h = frame_size
 
     if grayscale:
-        read_storage = np.empty((img_num, im_h, im_w), dtype=np.uint8)
+        read_storage = np.empty((img_num, im_w, im_h), dtype=np.uint8)
     else:
-        read_storage = np.empty((img_num, im_h, im_w, 3), dtype=np.uint8)
+        read_storage = np.empty((img_num, im_w, im_h, 3), dtype=np.uint8)
     
     ### Resize
     if resize:
         if grayscale:
-            resize_storage = np.empty((img_num, im_h, im_w), dtype=np.uint8)
+            resize_storage = np.empty((img_num, im_w, im_h), dtype=np.uint8)
         else:
-            resize_storage = np.empty((img_num, im_h, im_w, 3), dtype=np.uint8)
+            resize_storage = np.empty((img_num, im_w, im_h, 3), dtype=np.uint8)
 
         ## One Image ##
         if img_num == 1:
@@ -94,7 +90,7 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
             wait(future_objs)
 
         if grayscale:
-            resize_storage = resize_storage.reshape((img_num, 1, im_h, im_w))
+            resize_storage = resize_storage.reshape((img_num, 1, im_w, im_h))
         else:
             resize_storage = resize_storage.transpose((0, 3, 1, 2))
 
@@ -110,12 +106,12 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
         else:
             future_objs = []
             for i in range(img_num):
-                obj = _imread_executor_pool.submit(cv2_read_img, path_list[i], read_storage[0], grayscale)
+                obj = _imread_executor_pool.submit(cv2_read_img, path_list[i], read_storage[i], grayscale)
                 future_objs.append(obj)
             wait(future_objs)
         
         if grayscale:
-            read_storage = read_storage.reshape((img_num, 1, im_h, im_w))
+            read_storage = read_storage.reshape((img_num, 1, im_w, im_h))
         else:
             read_storage = read_storage.transpose((0, 3, 1, 2))
 

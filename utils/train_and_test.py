@@ -1,6 +1,6 @@
 import os
 import torch
-from utils.tools.dataloader import HKOIterator
+from utils.tools.dataloader import BKKIterator
 from utils.config import cfg
 import numpy as np
 from utils.tools.evaluation import Evaluation
@@ -16,14 +16,14 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
     IN_LEN = cfg.BENCHMARK.IN_LEN
     OUT_LEN = cfg.BENCHMARK.OUT_LEN
     evaluator = Evaluation(seq_len=OUT_LEN, use_central=False)
-    train_iter = HKOIterator(pd_path=cfg.HKO_PD.RAINY_TRAIN,
-                                     sample_mode="random",
-                                     seq_len=IN_LEN+OUT_LEN)
+    train_iter = BKKIterator(pd_path=cfg.ONM_PD.RAINY_TRAIN,
+                             sample_mode="random",
+                             seq_len=IN_LEN+OUT_LEN)
 
-    valid_iter = HKOIterator(pd_path=cfg.HKO_PD.RAINY_VALID,
-                                     sample_mode="sequent",
-                                     seq_len=IN_LEN+OUT_LEN,
-                                     stride=cfg.HKO.BENCHMARK.STRIDE)
+    valid_iter = BKKIterator(pd_path=cfg.ONM_PD.RAINY_VALID,
+                             sample_mode="sequent",
+                             seq_len=IN_LEN+OUT_LEN,
+                             stride=cfg.BENCHMARK.STRIDE)
 
     train_loss = 0.0
     save_dir = os.path.join(cfg.GLOBAL.MODEL_SAVE_DIR, folder_name)
@@ -45,23 +45,24 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
     writer = SummaryWriter(log_dir)
 
     for itera in tqdm(range(1, max_iterations+1)):
-        lr_scheduler.step()
-        train_batch, train_mask, sample_datetimes, _ = \
-            train_iter.sample(batch_size=batch_size)
+        if itera!=1:
+            lr_scheduler.step()
+        train_batch, train_mask, sample_datetimes, _ = train_iter.sample(batch_size=batch_size)
         train_batch = torch.from_numpy(train_batch.astype(np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
         train_data = train_batch[:IN_LEN, ...]
         train_label = train_batch[IN_LEN:IN_LEN + OUT_LEN, ...]
-        mask = torch.from_numpy(train_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
+        mask = torch.from_numpy(
+            train_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
 
         encoder_forecaster.train()
         optimizer.zero_grad()
         output = encoder_forecaster(train_data)
         loss = criterion(output, train_label, mask)
         loss.backward()
-        torch.nn.utils.clip_grad_value_(encoder_forecaster.parameters(), clip_value=50.0)
+        torch.nn.utils.clip_grad_value_(
+            encoder_forecaster.parameters(), clip_value=50.0)
         optimizer.step()
         train_loss += loss.item()
-
 
         train_label_numpy = train_label.cpu().numpy()
         if probToPixel is None:
@@ -72,7 +73,7 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
             # 使用分类问题，需要转化为像素值
             # 使用分类 Loss 的阈值
             output_numpy = probToPixel(output.detach().cpu().numpy(), train_label, mask,
-                                                            lr_scheduler.get_lr()[0])
+                                       lr_scheduler.get_lr()[0])
 
         evaluator.update(train_label_numpy, output_numpy, mask.cpu().numpy())
 
@@ -93,13 +94,15 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
                         valid_iter.sample(batch_size=batch_size)
                     if valid_batch.shape[1] == 0:
                         break
-                    if not cfg.HKO.EVALUATION.VALID_DATA_USE_UP and valid_time > cfg.HKO.EVALUATION.VALID_TIME:
+                    if not cfg.EVALUATION.VALID_DATA_USE_UP and valid_time > cfg.EVALUATION.VALID_TIME:
                         break
                     valid_time += 1
-                    valid_batch = torch.from_numpy(valid_batch.astype(np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
+                    valid_batch = torch.from_numpy(valid_batch.astype(
+                        np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
                     valid_data = valid_batch[:IN_LEN, ...]
                     valid_label = valid_batch[IN_LEN:IN_LEN + OUT_LEN, ...]
-                    mask = torch.from_numpy(valid_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
+                    mask = torch.from_numpy(
+                        valid_mask[IN_LEN:IN_LEN + OUT_LEN, ...].astype(int)).to(cfg.GLOBAL.DEVICE)
                     output = encoder_forecaster(valid_data)
 
                     loss = criterion(output, valid_label, mask)
@@ -107,11 +110,14 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
 
                     valid_label_numpy = valid_label.cpu().numpy()
                     if probToPixel is None:
-                        output_numpy = np.clip(output.detach().cpu().numpy(), 0.0, 1.0)
+                        output_numpy = np.clip(
+                            output.detach().cpu().numpy(), 0.0, 1.0)
                     else:
-                        output_numpy = probToPixel(output.detach().cpu().numpy(), valid_label, mask, lr_scheduler.get_lr()[0])
+                        output_numpy = probToPixel(output.detach().cpu(
+                        ).numpy(), valid_label, mask, lr_scheduler.get_lr()[0])
 
-                    evaluator.update(valid_label_numpy, output_numpy, mask.cpu().numpy())
+                    evaluator.update(valid_label_numpy,
+                                     output_numpy, mask.cpu().numpy())
                 _, _, valid_csi, valid_hss, _, valid_mse, valid_mae, valid_balanced_mse, valid_balanced_mae, _ = evaluator.calculate_stat()
 
                 evaluator.clear_all()
@@ -130,7 +136,8 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
             train_loss = 0.0
 
         if itera % test_and_save_checkpoint_iterations == 0:
-            torch.save(encoder_forecaster.state_dict(), os.path.join(model_save_dir, 'encoder_forecaster_{}.pth'.format(itera)))
+            torch.save(encoder_forecaster.state_dict(), os.path.join(
+                model_save_dir, 'encoder_forecaster_{}.pth'.format(itera)))
 
     writer.close()
 
@@ -156,7 +163,7 @@ def plot_result(writer, itera, train_result, valid_result):
         np.nan_to_num(valid_balanced_mse), \
         np.nan_to_num(valid_balanced_mae)
 
-    for i, thresh in enumerate(cfg.HKO.EVALUATION.THRESHOLDS):
+    for i, thresh in enumerate(cfg.EVALUATION.THRESHOLDS):
 
         writer.add_scalars("csi/{}".format(thresh), {
             "train": train_csi[:, i].mean(),
@@ -165,7 +172,7 @@ def plot_result(writer, itera, train_result, valid_result):
             "valid_last_frame": valid_csi[-1, i]
         }, itera)
 
-    for i, thresh in enumerate(cfg.HKO.EVALUATION.THRESHOLDS):
+    for i, thresh in enumerate(cfg.EVALUATION.THRESHOLDS):
 
         writer.add_scalars("hss/{}".format(thresh), {
             "train": train_hss[:, i].mean(),
@@ -201,5 +208,3 @@ def plot_result(writer, itera, train_result, valid_result):
         "train_last_frame": train_balanced_mae[-1],
         "valid_last_frame": valid_balanced_mae[-1],
     }, itera)
-
-
