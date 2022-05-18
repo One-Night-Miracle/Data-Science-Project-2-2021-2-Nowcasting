@@ -3,6 +3,8 @@ from torch import nn
 from collections import OrderedDict
 from utils.config import cfg
 
+import pandas as pd
+
 ### Block
 
 def make_layers(block):
@@ -149,3 +151,25 @@ def rainfall_to_pixel(rainfall_intensity, a=_A, b=_B):
     dBZ = rainfall_to_dBZ(rainfall_intensity)
     pixel_vals = dBZ_to_pixel(dBZ)
     return pixel_vals
+
+
+def rebuild_bkk_pkl():
+    filenames = pd.read_csv(cfg.ONM_CSV.ALL)[['DateTime','FolderPath','FileName']]
+    # filenames = pd.read_csv(cfg.ONM_CSV.ALL)[['FileName', 'RADAR_RGB_PNG_PATH', 'RADAR_dBZ_PNG_PATH', 'RADAR_MASK_PATH']]
+    filenames['DateTime'] = pd.to_datetime(filenames['DateTime'])
+    filenames = filenames.set_index('DateTime')
+
+    filenames['FileName'] = filenames['FileName'].str.replace(".png","")
+    filenames['RADAR_RGB_PNG_PATH'] = filenames['FolderPath'].str.replace("/data/bkk_radar_images/bkk_radar_images_", "bkk_radar_images_")
+    filenames['RADAR_RGB_PNG_PATH'] = filenames['RADAR_RGB_PNG_PATH'].str.replace(r"/", "", regex=True)
+    filenames['RADAR_dBZ_PNG_PATH'] = filenames['FolderPath'].str.replace("/data/bkk_radar_images/bkk_radar_images_", "bkk_radar_images_dBZ_")
+    filenames['RADAR_dBZ_PNG_PATH'] = filenames['RADAR_dBZ_PNG_PATH'].str.replace(r"/", "", regex=True)
+    filenames['RADAR_MASK_PATH'] = filenames['FolderPath'].str.replace("/data/bkk_radar_images/bkk_radar_images_", "bkk_radar_images_mask_")
+    filenames['RADAR_MASK_PATH'] = filenames['RADAR_MASK_PATH'].str.replace(r"/", "", regex=True)
+    filenames = filenames.drop(columns=['FolderPath'])
+
+    filenames.to_pickle(cfg.ONM_PD.FOLDER_ALL)
+
+    for i in range(1,14):
+        exec(f"filenames_{i} = filenames[filenames['RADAR_RGB_PNG_PATH']=='bkk_radar_images_{i}'].reset_index()[['FileName', 'RADAR_RGB_PNG_PATH', 'RADAR_dBZ_PNG_PATH', 'RADAR_MASK_PATH']]")
+        exec(f"filenames_{i}.to_pickle(cfg.ONM_PD.FOLDER_{i})")
