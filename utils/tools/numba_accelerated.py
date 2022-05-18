@@ -1,5 +1,15 @@
 import numpy as np
 from numba import jit, njit, float32, boolean, int32, float64
+
+from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
+warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
+
+from warnings import filterwarnings
+filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool` is a deprecated alias')
+
 from utils.tools.evaluation import dBZ_to_pixel
 from utils.config import cfg
 
