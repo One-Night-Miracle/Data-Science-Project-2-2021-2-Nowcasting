@@ -4,21 +4,16 @@ from utils.utils import *
 
 rebuild_bkk_pkl()
 
-def train_test_split(pd_path, n_data=500, ratio=(0.8,0.5,0.15)):
-    assert n_data > 500
+def train_test_split(pd_path, n=-1, ratio=(0.8,0.05,0.15)):
     assert ratio[0] + ratio[1] + ratio[2] == 1 
-    bkk_data = pd.read_pickle(cfg.ONM_PD.FOLDER_ALL)[:n_data]
+    bkk_data = pd.read_pickle(cfg.ONM_PD.FOLDER_ALL)[:n]
 
-    ratio[1] = ratio[0] + ratio[1]
-    ratio[2] = ratio[1] + ratio[2]
+    ratio_train = int(ratio[0]*bkk_data.shape[0])
+    ratio_valid = int((ratio[0] + ratio[1])*bkk_data.shape[0])
 
-    n_train = ratio[0]*bkk_data.shape[0]//1
-    n_valid = ratio[1]*bkk_data.shape[0]//1
-    n_test = ratio[2]*bkk_data.shape[0]//1
-
-    bkk_train = bkk_data.iloc[:n_train]
-    bkk_valid = bkk_data.iloc[n_train:n_valid]
-    bkk_test = bkk_data.iloc[n_valid:]
+    bkk_train = bkk_data.iloc[:ratio_train]
+    bkk_valid = bkk_data.iloc[ratio_train:ratio_valid]
+    bkk_test = bkk_data.iloc[ratio_valid:]
 
     bkk_train.to_csv(cfg.ONM_CSV.RAINY_TRAIN)
     pd.to_pickle(bkk_train, cfg.ONM_PD.RAINY_TRAIN)
