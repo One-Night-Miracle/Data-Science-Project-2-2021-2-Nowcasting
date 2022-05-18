@@ -44,8 +44,8 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
     writer = SummaryWriter(log_dir)
 
     for itera in tqdm(range(1, max_iterations+1)):
-        # if itera!=1:
-        lr_scheduler.step()
+        if itera>1:
+            lr_scheduler.step()
         train_batch, train_mask, sample_datetimes, _ = train_iter.sample(batch_size=batch_size)
         train_batch = torch.from_numpy(train_batch.astype(np.float32)).to(cfg.GLOBAL.DEVICE) / 255.0
         train_data = train_batch[:IN_LEN, ...]
@@ -130,8 +130,7 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
             train_loss = 0.0
 
         if itera % test_and_save_checkpoint_iterations == 0:
-            torch.save(encoder_forecaster.state_dict(), os.path.join(
-                model_save_dir, 'encoder_forecaster_{}.pth'.format(itera)))
+            torch.save(encoder_forecaster.state_dict(), os.path.join(model_save_dir, 'encoder_forecaster_{}.pth'.format(itera)))
 
     writer.close()
 
