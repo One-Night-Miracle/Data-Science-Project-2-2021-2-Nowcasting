@@ -7,50 +7,13 @@ from utils.utils import *
 import os
 import pickle
 
-# Month Encoder-Decoder
+from sklearn import preprocessing
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 
+# -Delete- encode_month
 
-def encode_month(month):
-    """
-    Encode the month into a vector
-
-    Parameters
-    ----------
-    month : np.ndarray
-        (...,) int, between 1 and 12
-    Returns
-    -------
-    ret : np.ndarray
-        (..., 2) float
-    """
-    angle = 2 * np.pi * month/12.0
-    ret = np.empty(shape=month.shape + (2,), dtype=np.float32)
-    ret[..., 0] = np.cos(angle)
-    ret[..., 1] = np.sin(angle)
-    return ret
-
-
-def decode_month(code):
-    """
-    Decode the month code back to the month value
-
-    Parameters
-    ----------
-    code : np.ndarray
-        (..., 2) float
-    Returns
-    -------
-    month : np.ndarray
-        (...,) int
-    """
-    assert code.shape[-1] == 2
-    flag = code[..., 1] >= 0
-    arccos_res = np.arccos(code[..., 0])
-    angle = flag * arccos_res + (1 - flag) * (2 * np.pi - arccos_res)
-    month = angle / (2.0 * np.pi) * 12.0
-    month = np.round(month).astype(np.int)
-    return month
-
+# -Delete- decode_month
 
 # Get mask
 
@@ -71,9 +34,32 @@ def get_exclude_mask():
 
 # -Delete- precompute_mask
 
+def normalizer_std(X):
+    scaler = preprocessing.StandardScaler().fit(X)
+    return scaler
+
+def normalizer_minmax(X):
+    scaler = preprocessing.MinMaxScaler().fit(X)
+    return scaler
+
+
+class BKKDataset(Dataset):
+    def __init__(self, data, normalizer=None):
+        self.data = data.astype(np.uint8)
+        self.normalizer = normalizer
+        # print(self.data.shape)
+
+    def __getitem__(self, index):
+        data = self.data[index] # Retrieve data
+        # data = self.normalizer.transform(data.reshape(1, -1)) # Normalize
+        return data
+
+    def __len__(self):
+        return self.data.shape[0]
+
 
 class BKKIterator(object):
-    def __init__(self, pd_path, sample_mode, seq_len=30,
+    def __init__(self, pd_path, sample_mode, seq_len=20,
                  max_consecutive_missing=2, begin_ind=None, end_ind=None,
                  stride=None, width=None, height=None, base_freq='5min'):
         """
@@ -102,6 +88,7 @@ class BKKIterator(object):
         height : int or None, optional
         base_freq : str, optional
         """
+
         if width is None:
             width = cfg.ONM.ITERATOR.WIDTH
         if height is None:
@@ -109,8 +96,7 @@ class BKKIterator(object):
 
         self._df = pd.read_pickle(pd_path)
         self.set_begin_end(begin_ind=begin_ind, end_ind=end_ind)
-        self._df_index_set = frozenset(
-            [self._df.index[i] for i in range(self._df.shape[0])])
+        self._df_index_set = frozenset([self._df.index[i] for i in range(self._df.shape[0])])
         self._exclude_mask = get_exclude_mask()
         self._seq_len = seq_len
         self._width = width
@@ -120,8 +106,7 @@ class BKKIterator(object):
         self._base_freq = base_freq
         self._base_time_delta = pd.Timedelta(base_freq)
 
-        assert sample_mode in [
-            "random", "sequent"], "Sample mode=%s is not supported" % sample_mode
+        assert sample_mode in ["random", "sequent"], "Sample mode=%s is not supported" % sample_mode
         self.sample_mode = sample_mode
 
         if sample_mode == "sequent":
@@ -190,10 +175,8 @@ class BKKIterator(object):
         for clip in datetime_clips:
             assert len(clip) == self._seq_len
         batch_size = len(datetime_clips)
-        frame_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),
-                             dtype=np.uint8)
-        mask_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),
-                            dtype=np.bool)
+        frame_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),dtype=np.uint8)
+        mask_dat = np.zeros((self._seq_len, batch_size, 1, self._width, self._height),dtype=np.bool)
         if batch_size == 0:
             return frame_dat, mask_dat
         if self.sample_mode == "random":
@@ -207,13 +190,11 @@ class BKKIterator(object):
                     if timestamp in self._df_index_set:
                         paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
                         mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
-                        # paths.append(convert_datetime_to_filepath(datetime_clips[j][i]))
-                        # mask_paths.append(convert_datetime_to_maskpath(datetime_clips[j][i]))
                         hit_inds.append([i, j])
                     else:
                         miss_inds.append([i, j])
             hit_inds = np.array(hit_inds, dtype=np.int)
-            all_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
+            all_frame_dat = image.quick_read_frames(path_list=paths, resize=True, frame_size=(self._width, self._height), grayscale=True)
             all_mask_dat = mask.quick_read_masks(mask_paths)
             frame_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_frame_dat
             mask_dat[hit_inds[:, 0], hit_inds[:, 1], :, :, :] = all_mask_dat
@@ -233,11 +214,9 @@ class BKKIterator(object):
                      and last_timestamp in self._buffer_datetime_keys):
                 read_begin_ind = self._df.index.get_loc(first_timestamp)
                 read_end_ind = self._df.index.get_loc(last_timestamp) + 1
-                read_end_ind = min(read_begin_ind +
-                                   self._buffer_mult *
-                                   (read_end_ind - read_begin_ind),
-                                   self._df.size)
+                read_end_ind = min(read_begin_ind + self._buffer_mult * (read_end_ind - read_begin_ind), self._df.size)
                 self._buffer_datetime_keys = self._df.index[read_begin_ind:read_end_ind]
+
                 # Fill in the buffer
                 paths = []
                 mask_paths = []
@@ -245,9 +224,7 @@ class BKKIterator(object):
                     timestamp = self._buffer_datetime_keys[i]
                     paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
                     mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
-                    # paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
-                    # mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
-                self._buffer_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
+                self._buffer_frame_dat = image.quick_read_frames(path_list=paths, resize=True, frame_size=(self._width, self._height), grayscale=True)
                 self._buffer_mask_dat = mask.quick_read_masks(mask_paths)
             for i in range(self._seq_len):
                 for j in range(batch_size):
