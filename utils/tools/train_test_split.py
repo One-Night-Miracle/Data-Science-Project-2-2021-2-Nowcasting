@@ -2,10 +2,9 @@ import pandas as pd
 from utils.config import cfg
 from utils.utils import *
 
-rebuild_bkk_pkl()
-
 def train_test_split(pd_path, n=-1, ratio=(0.8,0.05,0.15)):
     assert ratio[0] + ratio[1] + ratio[2] == 1 
+    rebuild_bkk_pkl()
     bkk_data = pd.read_pickle(cfg.ONM_PD.FOLDER_ALL)[:n]
 
     ratio_train = int(ratio[0]*bkk_data.shape[0])
