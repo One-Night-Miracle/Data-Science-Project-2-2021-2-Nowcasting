@@ -19,27 +19,27 @@ import copy
 import time
 import pickle
 
-# from experiments.rover_and_last_frame import LastFrame, Rover
-
 
 encoder = Encoder(encoder_params[0], encoder_params[1]).to(cfg.GLOBAL.DEVICE)
 forecaster = Forecaster(forecaster_params[0], forecaster_params[1])
-encoder_forecaster1 = EF(encoder, forecaster)
-encoder_forecaster2 = copy.deepcopy(encoder_forecaster1)
-conv2d_network = Predictor(conv2d_params).to(cfg.GLOBAL.DEVICE)
 
+encoder_forecaster1 = EF(encoder, forecaster)
 encoder_forecaster1 = encoder_forecaster1.to(cfg.GLOBAL.DEVICE)
+encoder_forecaster1.load_state_dict(torch.load(os.path.join(cfg.GLOBAL.MODEL_SAVE_DIR,'trajGRU_balanced_mse_mae','models','encoder_forecaster_77000.pth')))
+
+encoder_forecaster2 = EF(encoder, forecaster)
 encoder_forecaster2 = encoder_forecaster2.to(cfg.GLOBAL.DEVICE)
-encoder_forecaster1.load_state_dict(torch.load('/home/hzzone/save/trajGRU_balanced_mse_mae/models/encoder_forecaster_77000.pth'))
-encoder_forecaster2.load_state_dict(torch.load('/home/hzzone/save/trajGRU_frame_weighted_mse/models/encoder_forecaster_45000.pth'))
-conv2d_network.load_state_dict(torch.load('/home/hzzone/save/conv2d/models/encoder_forecaster_60000.pth'))
+encoder_forecaster2.load_state_dict(torch.load(os.path.join(cfg.GLOBAL.MODEL_SAVE_DIR,'trajGRU_frame_weighted_mse','models','encoder_forecaster_45000.pth')))
+
+conv2d_network = Predictor(conv2d_params).to(cfg.GLOBAL.DEVICE)
+conv2d_network.load_state_dict(torch.load(os.path.join(cfg.GLOBAL.MODEL_SAVE_DIR,'conv2d','models', 'encoder_forecaster_10000.pth')))
+
 
 convlstm_encoder = Encoder(convlstm_encoder_params[0], convlstm_encoder_params[1]).to(cfg.GLOBAL.DEVICE)
-
 convlstm_forecaster = Forecaster(convlstm_forecaster_params[0], convlstm_forecaster_params[1]).to(cfg.GLOBAL.DEVICE)
 
 convlstm_encoder_forecaster = EF(convlstm_encoder, convlstm_forecaster).to(cfg.GLOBAL.DEVICE)
-convlstm_encoder_forecaster.load_state_dict(torch.load('/home/models/save/convLSTM_balacned_mse_mae/models/encoder_forecaster_64000.pth'))
+convlstm_encoder_forecaster.load_state_dict(torch.load(os.path.join(cfg.GLOBAL.MODEL_SAVE_DIR,'convLSTM_balacned_mse_mae','models', 'encoder_forecaster_64000.pth')))
 
 
 models = OrderedDict({
@@ -47,8 +47,6 @@ models = OrderedDict({
     'conv2d': conv2d_network,
     'trajGRU_balanced_mse_mae': encoder_forecaster1,
     'trajGRU_frame_weighted_mse': encoder_forecaster2,
-    # 'last_frame': LastFrame,
-    # 'rover_nonlinear': Rover()
 })
 
 model_run_avarage_time = dict()
@@ -59,9 +57,9 @@ with torch.no_grad():
             model.eval()
         evaluator = Evaluation(seq_len=OUT_LEN, use_central=False)
         bkk_iter = BKKIterator(pd_path=cfg.ONM_PD.RAINY_TEST,
-                                     sample_mode="sequent",
-                                     seq_len=IN_LEN + OUT_LEN,
-                                     stride=cfg.BENCHMARK.STRIDE)
+                               sample_mode="sequent",
+                               seq_len=IN_LEN + OUT_LEN,
+                               stride=cfg.BENCHMARK.STRIDE)
         model_run_avarage_time[name] = 0.0
         valid_time = 0
         while not bkk_iter.use_up:
