@@ -426,10 +426,10 @@ class Evaluation(object):
         -------
 
         """
-        a = self._total_hits.astype(np.float64)
-        b = self._total_false_alarms.astype(np.float64)
-        c = self._total_misses.astype(np.float64)
-        d = self._total_true_negatives.astype(np.float64)
+        a = self._total_hits.astype(np.float64) + 1e-5
+        b = self._total_false_alarms.astype(np.float64) + 1e-5
+        c = self._total_misses.astype(np.float64) + 1e-5
+        d = self._total_true_negatives.astype(np.float64) + 1e-5
 
         pod = a / (a + c) # precision
         far = b / (a + b) # false alarm rate
