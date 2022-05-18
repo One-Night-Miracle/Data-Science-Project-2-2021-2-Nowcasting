@@ -163,7 +163,7 @@ def rebuild_bkk_pkl():
     filenames['DateTime'] = pd.to_datetime(filenames['DateTime'])
     filenames = filenames.set_index('DateTime')
 
-    filenames['FileName'] = filenames['FileName'].str.replace(".png","")
+    filenames['FileName'] = filenames['FileName'].str.replace(".png","", regex=True)
     filenames['RADAR_RGB_PNG_PATH'] = filenames['FolderPath'].str.replace("/data/bkk_radar_images/bkk_radar_images_", "bkk_radar_images_")
     filenames['RADAR_RGB_PNG_PATH'] = filenames['RADAR_RGB_PNG_PATH'].str.replace(r"/", "", regex=True)
     filenames['RADAR_dBZ_PNG_PATH'] = filenames['FolderPath'].str.replace("/data/bkk_radar_images/bkk_radar_images_", "bkk_radar_images_dBZ_")
