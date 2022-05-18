@@ -59,13 +59,7 @@ def get_exclude_mask():
         exclude_mask = dat['exclude_mask'][:]
         return exclude_mask
 
-
-# Get Date Info
-
-def get_valid_datetime_set():
-    valid_datetime_set = pickle.load(open(cfg.CSV_DATETIME_PATH, 'rb'))
-    return valid_datetime_set
-
+# -Delete- get_valid_datetime_set
 
 # -Delete- convert_datetime_to_filepath
 
@@ -212,7 +206,8 @@ class BKKIterator(object):
                 for j in range(batch_size):
                     timestamp = datetime_clips[j][i]
                     if timestamp in self._df_index_set:
-                        paths.append("../.." + self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
+                        paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
+                        mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
                         # paths.append(convert_datetime_to_filepath(datetime_clips[j][i]))
                         # mask_paths.append(convert_datetime_to_maskpath(datetime_clips[j][i]))
                         hit_inds.append([i, j])
@@ -249,8 +244,8 @@ class BKKIterator(object):
                 mask_paths = []
                 for i in range(self._buffer_datetime_keys.shape[0]):
                     timestamp = self._buffer_datetime_keys[i]
-                    paths.append(
-                        self._df.loc[timestamp].FolderPath + self._df.loc[timestamp].FileName)
+                    paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
+                    mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
                     # paths.append(convert_datetime_to_filepath(self._buffer_datetime_keys[i]))
                     # mask_paths.append(convert_datetime_to_maskpath(self._buffer_datetime_keys[i]))
                 self._buffer_frame_dat = image.quick_read_frames(path_list=paths, frame_size=(self._width, self._height), grayscale=True)
