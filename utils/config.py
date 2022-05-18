@@ -37,7 +37,7 @@ __C.EVALUATION = edict()
 # Image Cropping Region (TOP, LEFT, RIGHT, BOTTOM)
 __C.EVALUATION.CENTRAL_REGION = (0, 0, 480, 480)
 __C.EVALUATION.THRESHOLDS = np.array(
-    [0, 5.5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75])
+    [0.5, 5.5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75])
 __C.EVALUATION.BALANCING_WEIGHTS = (
     1, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75)
 
