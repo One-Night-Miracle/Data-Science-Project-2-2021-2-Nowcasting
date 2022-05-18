@@ -17,6 +17,8 @@ __C.GLOBAL.ZR.A = 200.0
 __C.GLOBAL.ZR.B = 1.6
 
 __C.GLOBAL.MODEL_SAVE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models_save'))
+if not os.path.exists(__C.GLOBAL.MODEL_SAVE_DIR):
+    os.makedirs(__C.GLOBAL.MODEL_SAVE_DIR)
 
 __C.ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 __C.DATA_BASE_PATH = os.path.join(__C.ROOT_DIR, 'data')
@@ -33,7 +35,7 @@ for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images_mask')]:
 
 __C.EVALUATION = edict()
 # Image Cropping Region (TOP, LEFT, RIGHT, BOTTOM)
-__C.EVALUATION.CENTRAL_REGION = (0, 0, 2034, 2048)
+__C.EVALUATION.CENTRAL_REGION = (0, 0, 480, 480)
 __C.EVALUATION.THRESHOLDS = np.array(
     [0, 5.5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75])
 __C.EVALUATION.BALANCING_WEIGHTS = (
@@ -91,8 +93,8 @@ __C.ONM_CSV.RAINY_TEST =os.path.join(__C.DATA_BASE_PATH, 'bkk_test.csv')
 __C.ONM = edict()
 
 __C.ONM.ITERATOR = edict()
-__C.ONM.ITERATOR.WIDTH = 2034
-__C.ONM.ITERATOR.HEIGHT = 2048
+__C.ONM.ITERATOR.WIDTH = 480
+__C.ONM.ITERATOR.HEIGHT = 480
 # Whether to discard part of the rainfall, has a denoising effect
 __C.ONM.ITERATOR.FILTER_RAINFALL = True
 # All the pixel values that are smaller than round(threshold * 255) will be discarded
