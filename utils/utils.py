@@ -116,7 +116,7 @@ def rainfall_to_dBZ(rainfall, a=_A, b=_B):
     -------
     rainfall_intensity : np.ndarray
     """
-    return 10*np.log10(a) + 10*b*np.log10(rainfall)
+    return 10*np.log10(a) + 10*b*np.log10(rainfall+0.5)
 
 def pixel_to_rainfall(img, a=_A, b=_B):
     """Convert the pixel values to real rainfall intensity
