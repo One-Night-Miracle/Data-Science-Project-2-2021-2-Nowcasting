@@ -20,7 +20,7 @@ def warp(input, flow):
     vgrid[:, 0, :, :] = 2.0 * vgrid[:, 0, :, :].clone() / max(W - 1, 1) - 1.0
     vgrid[:, 1, :, :] = 2.0 * vgrid[:, 1, :, :].clone() / max(H - 1, 1) - 1.0
     vgrid = vgrid.permute(0, 2, 3, 1)
-    output = F.grid_sample(input, vgrid)
+    output = F.grid_sample(input, vgrid, align_corners=True)
     return output
 
 class BaseConvRNN(nn.Module):
