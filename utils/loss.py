@@ -1,35 +1,18 @@
 from torch import nn
 import torch
 from utils.config import cfg
-from utils.utils import rainfall_to_pixel
+from utils.utils import dBZ_to_pixel
 import torch.nn.functional as F
 
 class WeightedCrossEntropyLoss(nn.Module):
 
     # Weight should be a 1D Tensor assigning weight to each of the classes.
-    def __init__(self, thresholds, weight=None, LAMBDA=None):
+    def __init__(self, weight=None, LAMBDA=None):
         super().__init__()
         self._weight = weight
         self._lambda = LAMBDA
-        self._thresholds = thresholds
 
     def forward(self, input, target, mask):
-        """
-        Parameters
-        ----------
-        input: Tensor
-            output probability
-            Shape: (seq_len, batch_size, 1, height, width)
-        target : Tensor (0~1)
-            Shape: (seq_len, batch_size, 1, height, width)
-        mask : Tensor
-            Shape: (seq_len, batch_size, 1, height, width)
-        
-        Returns
-        -------
-        error : Tensor
-            Shape: (1)
-        """
         assert input.size(0) == cfg.BENCHMARK.OUT_LEN
 
         # B*C*S*H*W
@@ -39,8 +22,8 @@ class WeightedCrossEntropyLoss(nn.Module):
         target = target.permute((1, 2, 0, 3, 4)).squeeze(1)
 
         class_index = torch.zeros_like(target).long()
-        thresholds = [0.0] + rainfall_to_pixel(self._thresholds).tolist()
-        # print(thresholds)
+        thresholds = [0.0] + [dBZ_to_pixel(ele) for ele in cfg.EVALUATION.THRESHOLDS]
+
         for i, threshold in enumerate(thresholds):
             class_index[target >= threshold] = i
         
@@ -52,7 +35,7 @@ class WeightedCrossEntropyLoss(nn.Module):
             w = torch.arange(1.0, 1.0 + S * self._lambda, self._lambda)
             if torch.cuda.is_available():
                 w = w.to(error.get_device())
-                # B*H*W*S
+                # B, H, W, S
             error = (w * error.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
 
         # S*B*1*H*W
@@ -70,25 +53,9 @@ class Weighted_mse_mae(nn.Module):
         self._lambda = LAMBDA
 
     def forward(self, input, target, mask):
-        """
-        Parameters
-        ----------
-        input: Tensor
-            output probability
-            Shape: (seq_len, batch_size, 1, height, width)
-        target : Tensor (0~1)
-            Shape: (seq_len, batch_size, 1, height, width)
-        mask : Tensor
-            Shape: (seq_len, batch_size, 1, height, width)
-        
-        Returns
-        -------
-        error : Tensor
-            Shape: (1)
-        """
         balancing_weights = cfg.EVALUATION.BALANCING_WEIGHTS
         weights = torch.ones_like(input) * balancing_weights[0]
-        thresholds = [rainfall_to_pixel(ele) for ele in cfg.EVALUATION.THRESHOLDS]
+        thresholds = [dBZ_to_pixel(ele) for ele in cfg.EVALUATION.THRESHOLDS]
 
         for i, threshold in enumerate(thresholds):
             weights = weights + (balancing_weights[i+1] - balancing_weights[i]) * (target >= threshold).float()
