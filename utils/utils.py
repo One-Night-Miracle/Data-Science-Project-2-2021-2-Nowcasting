@@ -35,6 +35,10 @@ def make_layers(block):
                 layers.append(('relu_' + layer_name, nn.ReLU(inplace=True)))
             elif 'leaky' in layer_name:
                 layers.append(('leaky_' + layer_name, nn.LeakyReLU(negative_slope=0.2, inplace=True)))
+        
+        elif 'interpolate' in layer_name:
+            pass
+
         else:
             raise NotImplementedError
 

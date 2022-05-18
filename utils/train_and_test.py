@@ -57,8 +57,7 @@ def train_and_test(encoder_forecaster, optimizer, criterion, lr_scheduler, batch
         output = encoder_forecaster(train_data)
         loss = criterion(output, train_label, mask)
         loss.backward()
-        torch.nn.utils.clip_grad_value_(
-            encoder_forecaster.parameters(), clip_value=50.0)
+        torch.nn.utils.clip_grad_value_(encoder_forecaster.parameters(), clip_value=50.0)
         optimizer.step()
         train_loss += loss.item()
 

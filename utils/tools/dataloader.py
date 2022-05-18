@@ -179,8 +179,7 @@ class BKKIterator(object):
         for i in range(len(datetime_clip)):
             if datetime_clip[i] not in self._df_index_set:
                 missing_count += 1
-                if missing_count > self._max_consecutive_missing or\
-                        missing_count >= len(datetime_clip):
+                if missing_count > self._max_consecutive_missing or missing_count >= len(datetime_clip):
                     return False
             else:
                 missing_count = 0
