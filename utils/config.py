@@ -83,6 +83,13 @@ __C.ONM_PD.RAINY_VALID = os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_valid.pkl')
 __C.ONM_PD.RAINY_TEST =os.path.join(__C.ONM_PD_BASE_PATH, 'bkk_test.pkl')
 
 
+__C.ONM_CSV = edict()
+__C.ONM_CSV.ALL = os.path.join(__C.DATA_BASE_PATH, 'bkk_all.csv')
+__C.ONM_CSV.RAINY_TRAIN = os.path.join(__C.DATA_BASE_PATH, 'bkk_train.csv')
+__C.ONM_CSV.RAINY_VALID = os.path.join(__C.DATA_BASE_PATH, 'bkk_valid.csv')
+__C.ONM_CSV.RAINY_TEST =os.path.join(__C.DATA_BASE_PATH, 'bkk_test.csv')
+
+
 __C.ONM = edict()
 
 __C.ONM.ITERATOR = edict()
