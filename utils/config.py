@@ -23,15 +23,15 @@ assert __C.GLOBAL.MODEL_SAVE_DIR is not None
 __C.ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 __C.DATA_BASE_PATH = os.path.join(__C.ROOT_DIR, 'data')
 
-# for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images')]:
-#     if os.path.exists(dirs):
-#         __C.RADAR_RGB_PNG_PATH = dirs
+for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images')]:
+    if os.path.exists(dirs):
+        __C.RADAR_RGB_PNG_PATH = dirs
 for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images_dBZ')]:
     if os.path.exists(dirs):
-        __C.RADAR_PNG_PATH = dirs
-# for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images_dBZ')]:
-#     if os.path.exists(dirs):
-#         __C.MASK_PATH = dirs
+        __C.RADAR_dBZ_PNG_PATH = dirs
+for dirs in [os.path.join(__C.DATA_BASE_PATH, 'bkk_radar_images_mask')]:
+    if os.path.exists(dirs):
+        __C.RADAR_MASK_PATH = dirs
 
 __C.EVALUATION = edict()
 # Image Cropping Region (TOP, LEFT, RIGHT, BOTTOM)
