@@ -1,5 +1,4 @@
 # Python plugin that supports loading batch of images in parallel
-import os
 import cv2
 import numpy as np
 from utils.config import cfg
@@ -111,7 +110,7 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
             wait(future_objs)
         
         if grayscale:
-            read_storage = read_storage.reshape((img_num, 1, im_w, im_h))
+            read_storage = read_storage.reshape((img_num, 1, 2034, 2048))
         else:
             read_storage = read_storage.transpose((0, 3, 1, 2))
 
