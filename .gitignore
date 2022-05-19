@@ -1,10 +1,7 @@
 # Data
-data/bkk_radar_images/*
-data/bkk_radar_images_dBZ/*
-data/bkk_radar_images_mask/*
-data/pd/*.pkl
-data/benchmark_stat/*
-models_save/*
+data/bkk_radar_images
+data/bkk_radar_images_dBZ
+data/bkk_radar_images_mask
 
 # Original Package
 HKO
