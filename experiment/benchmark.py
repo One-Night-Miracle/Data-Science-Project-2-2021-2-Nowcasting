@@ -100,7 +100,7 @@ for p in os.listdir(os.path.abspath(cfg.BENCHMARK.STAT_PATH)):
     e = pickle.load(open(os.path.join(cfg.BENCHMARK.STAT_PATH, p), 'rb'))
     _, _, csi, hss, _, mse, mae, balanced_mse, balanced_mae, _ = e.calculate_stat()
     print(p.split('.')[0])
-    for i, thresh in enumerate(cfg.HKO.EVALUATION.THRESHOLDS):
+    for i, thresh in enumerate(cfg.EVALUATION.THRESHOLDS):
         print('thresh %.1f csi: avarage %.4f, last frame %.4f; hss: avarage %.4f, last frame %.4f;'
               % (thresh, csi[:, i].mean(), csi[-1, i], hss[:, i].mean(), hss[-1, i]))
 
