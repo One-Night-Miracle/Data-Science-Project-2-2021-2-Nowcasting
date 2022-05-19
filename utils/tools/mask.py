@@ -27,9 +27,9 @@ def read_mask_file(filepath, out=None):
     dat = zlib.decompress(f.read())
 
     if out is None:
-        return np.frombuffer(dat, dtype=int).reshape((img_width, img_height)).astype(bool)
+        return np.frombuffer(dat, dtype=np.uint32).reshape((img_width, img_height)).astype(bool)
     
-    out[:] = np.frombuffer(dat, dtype=int).reshape((img_width, img_height)).astype(bool)
+    out[:] = np.frombuffer(dat, dtype=np.uint32).reshape((img_width, img_height)).astype(bool)
     f.close()
 
 
