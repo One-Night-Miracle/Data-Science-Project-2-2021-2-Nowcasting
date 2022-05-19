@@ -188,8 +188,8 @@ class BKKIterator(object):
                 for j in range(batch_size):
                     timestamp = datetime_clips[j][i]
                     if timestamp in self._df_index_set:
-                        paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
-                        mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
+                        paths.append(os.path.join(cfg.RADAR_dBZ_PNG_PATH, self._df.loc[timestamp].RADAR_dBZ_PNG_PATH, self._df.loc[timestamp].FileName + '.png'))
+                        mask_paths.append(os.path.join(cfg.RADAR_MASK_PATH, self._df.loc[timestamp].RADAR_MASK_PATH, self._df.loc[timestamp].FileName + '.mask'))
                         hit_inds.append([i, j])
                     else:
                         miss_inds.append([i, j])
@@ -222,8 +222,8 @@ class BKKIterator(object):
                 mask_paths = []
                 for i in range(self._buffer_datetime_keys.shape[0]):
                     timestamp = self._buffer_datetime_keys[i]
-                    paths.append(self._df.loc[timestamp].RADAR_dBZ_PNG_PATH + self._df.loc[timestamp].FileName + ".png")
-                    mask_paths.append(self._df.loc[timestamp].RADAR_MASK_PATH + self._df.loc[timestamp].FileName + ".mask")
+                    paths.append(os.path.join(cfg.RADAR_dBZ_PNG_PATH, self._df.loc[timestamp].RADAR_dBZ_PNG_PATH, self._df.loc[timestamp].FileName + '.png'))
+                    mask_paths.append(os.path.join(cfg.RADAR_MASK_PATH, self._df.loc[timestamp].RADAR_MASK_PATH, self._df.loc[timestamp].FileName + '.mask'))
                 self._buffer_frame_dat = image.quick_read_frames(path_list=paths, resize=True, frame_size=(self._width, self._height), grayscale=True)
                 self._buffer_mask_dat = mask.quick_read_masks(mask_paths)
             for i in range(self._seq_len):
@@ -290,16 +290,13 @@ class BKKIterator(object):
                                                   periods=self._seq_len,
                                                   freq=self._base_freq)
                     if self._is_valid_clip(datetime_clip):
-                        new_start = new_start or (
-                            self._current_datetime == self.begin_time)
+                        new_start = new_start or (self._current_datetime == self.begin_time)
                         datetime_clips.append(datetime_clip)
                         self._current_datetime += self._stride * self._base_time_delta
                         break
                     else:
                         new_start = True
-                        self._current_datetime =\
-                            self._next_exist_timestamp(
-                                timestamp=self._current_datetime)
+                        self._current_datetime = self._next_exist_timestamp(timestamp=self._current_datetime)
                         if self._current_datetime is None:
                             # This indicates that there is no timestamp left,
                             # We point the current_datetime to be the next timestamp of self.end_time
