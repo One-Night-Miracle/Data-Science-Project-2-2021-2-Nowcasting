@@ -66,9 +66,9 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
     im_w, im_h = frame_size
 
     if grayscale:
-        read_storage = np.empty((img_num, im_w, im_h), dtype=np.uint8)
+        read_storage = np.empty((img_num, 2034, 2048), dtype=np.uint8)
     else:
-        read_storage = np.empty((img_num, im_w, im_h, 3), dtype=np.uint8)
+        read_storage = np.empty((img_num, 2034, 2048, 3), dtype=np.uint8)
     
     ### Resize
     if resize:
