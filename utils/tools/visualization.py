@@ -80,8 +80,8 @@ def get_color_flow_legend_image(size=50):
     return rgba_dat
 
 
-def save_hko_gif(im_dat, save_path):
-    """Save the HKO images to gif
+def save_bkk_gif(im_dat, save_path):
+    """Save the BKK images to gif
 
     Parameters
     ----------
@@ -122,9 +122,9 @@ def merge_rgba_cv2(front_img, back_img):
     return result_img
 
 
-def save_hko_movie(im_dat, datetime_list, mask_dat=None, save_path="hko.mp4", masked=False,
+def save_bkk_movie(im_dat, datetime_list, mask_dat=None, save_path="bkk.mp4", masked=False,
                    fps=5, prediction_start=None):
-    """Save the HKO images to a video file
+    """Save the BKK images to a video file
     
     Parameters
     ----------
@@ -142,8 +142,8 @@ def save_hko_movie(im_dat, datetime_list, mask_dat=None, save_path="hko.mp4", ma
     prediction_start : int or None
         The starting point of the prediction
     """
-    from nowcasting.config import cfg
-    central_region = cfg.HKO.EVALUATION.CENTRAL_REGION
+    from utils.config import cfg
+    central_region = cfg.EVALUATION.CENTRAL_REGION
     seq_len, height, width = im_dat.shape
     display_im_dat = []
     mask_color = np.array((0, 170, 160, 150), dtype=np.float32) / 255.0
