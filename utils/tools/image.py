@@ -37,7 +37,7 @@ def cv2_read_img(path, read_storage, grayscale=True, resize_storage=None, frame_
         resize_storage[:] = cv2.resize(read_storage, frame_size, interpolation=cv2.INTER_LINEAR)
 
 
-def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
+def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True, frame_size_in=None):
     """
     Multi-thread Frame Loader
     (Load mask files to numpy array)
@@ -64,6 +64,15 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
         frame_size = (img_width, img_height)
     im_w, im_h = frame_size
 
+    if frame_size_in is None:
+        frame_size_in = (img_width, img_height)
+    im_w_in, im_h_in = frame_size_in
+
+
+    if grayscale:
+        read_storage = np.empty((img_num, im_w_in, im_h_in), dtype=np.uint8)
+    else:
+        read_storage = np.empty((img_num, im_w_in, im_h_in, 3), dtype=np.uint8)
     
     ### Resize
     if resize:
