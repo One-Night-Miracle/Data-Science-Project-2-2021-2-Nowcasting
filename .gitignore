@@ -3,8 +3,9 @@ data/bkk_radar_images
 data/bkk_radar_images_dBZ
 data/bkk_radar_images_mask
 data/bkk_radar_images_prediction
-models_save/*
 data/benchmark_stat/*
+models_save/*
+
 
 # Original Package
 HKO

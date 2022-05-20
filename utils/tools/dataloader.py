@@ -261,7 +261,7 @@ class BKKIterator(object):
             return True
 
     def sample(self, batch_size, only_return_datetime=False):
-        """Sample a minibatch from the hko7 dataset based on the given type and pd_file
+        """Sample a minibatch from the bkk dataset based on the given type and pd_file
 
         Parameters
         ----------
