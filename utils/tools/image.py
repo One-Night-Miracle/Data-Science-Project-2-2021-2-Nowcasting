@@ -64,13 +64,14 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
         frame_size = (img_width, img_height)
     im_w, im_h = frame_size
 
-    if grayscale:
-        read_storage = np.empty((img_num, 2034, 2048), dtype=np.uint8)
-    else:
-        read_storage = np.empty((img_num, 2034, 2048, 3), dtype=np.uint8)
     
     ### Resize
     if resize:
+        if grayscale:
+            read_storage = np.empty((img_num, 480, 480), dtype=np.uint8)
+        else:
+            read_storage = np.empty((img_num, 480, 480, 3), dtype=np.uint8)
+
         if grayscale:
             resize_storage = np.empty((img_num, im_w, im_h), dtype=np.uint8)
         else:
@@ -97,6 +98,11 @@ def quick_read_frames(path_list, resize=False, frame_size=None, grayscale=True):
     
     ### NOT Resize ###
     else:
+        if grayscale:
+            read_storage = np.empty((img_num, 2034, 2048), dtype=np.uint8)
+        else:
+            read_storage = np.empty((img_num, 2034, 2048, 3), dtype=np.uint8)
+
         ## One Image ##
         if img_num == 1:
             cv2_read_img(path_list[0], read_storage[0], grayscale)

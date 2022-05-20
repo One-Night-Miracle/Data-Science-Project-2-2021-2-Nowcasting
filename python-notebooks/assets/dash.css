@@ -43,24 +43,24 @@
 }
 
 .img-width-height {
-  width: 350px;
-  height: 350px;
+  width: 300px;
+  height: 300px;
 }
 
 .container {
   background-color: #ffffff;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   /* grid-template-rows: 300px 300px; */
   /* grid-template-rows: repeat(2, minmax(0, 1fr)); */
-  grid-gap: 10px;
+  grid-gap: 5px;
   justify-content: center;
   align-items: center;
   margin-top: 10px;
 }
 
-.col-span-3 {
-  grid-column: span 3;
+.col-span-4 {
+  grid-column: span 4;
 }
 
 .DateInput,
